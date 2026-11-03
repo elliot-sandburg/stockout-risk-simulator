@@ -6,9 +6,13 @@ Built with Python, SQLite, NumPy, Plotly, and Streamlit, and checked by a 20-tes
 
 ---
 
-## 🖥️ Preview
+## 🖥️ Application Preview
 
-![Dashboard Preview](dashboard.png)
+### 🔬 Tab 1: Single-SKU Monte Carlo Simulator & Distribution Engine
+![Tab 1 Simulator](tab1_simulator.png)
+
+### 📋 Tab 2: Department Catalog & Automated PO Generator (v2)
+![Tab 2 Catalog and PO Generator](tab2_catalog_po.png)
 
 ---
 
