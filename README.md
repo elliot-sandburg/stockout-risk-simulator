@@ -1,16 +1,12 @@
-Here's a revised version that reads more naturally, keeping all the technical content intact:
+# 📦 Stockout Risk & Working Capital Simulator (v2)
+
+A replenishment tool for teams that need to balance stockout risk against the cash tied up in inventory. It pairs a Monte Carlo simulator with a small SQLite-backed catalog and a purchase order generator, so you can go from "what should our safety stock be?" to an actual order in one place.
+
+Built with Python, SQLite, NumPy, Plotly, and Streamlit, and checked by a 20-test `pytest` suite.
 
 ---
 
-# 📦 Inventory Replenishment & Stockout Risk Simulator
-
-A small inventory policy engine with an interactive dashboard for setting reorder points and safety stock when supplier lead times are unpredictable. It compares three approaches side by side, including carrier delays and contractor demand spikes, so you can see how much protection each one actually delivers.
-
-Built with Python, NumPy, Plotly, and Streamlit, and checked with a 20-test `pytest` suite.
-
----
-
-## 🖥️ Dashboard Preview
+## 🖥️ Preview
 
 ![Dashboard Preview](dashboard.png)
 
@@ -18,51 +14,57 @@ Built with Python, NumPy, Plotly, and Streamlit, and checked with a 20-test `pyt
 
 ## 🎯 The Problem
 
-Most reorder formulas assume a supplier's freight always shows up in the same number of days. In practice, on a building materials trade desk, transit times swing around quite a bit. Carriers run late, flatbeds get scarce, and regional bottlenecks pile up.
+Most reorder formulas assume a vendor's freight arrives on the same day every time. On a building materials trade desk, that's rarely true. Carriers run short, flatbeds get scarce, and regional bottlenecks stack up, so transit times move around a lot.
 
-Ignoring that variability leaves you exposed. Take a vendor whose deliveries land anywhere from 18 to 22 days out. If you use the standard textbook formula to target a 95% cycle service level, you actually end up with roughly 90.7%. That means you run out of stock about one replenishment cycle in ten, not one in twenty.
+Ignoring that variability leaves you exposed. Take a vendor whose deliveries land anywhere from 18 to 22 days out. If you size safety stock with the standard textbook formula aiming for a 95% cycle service level, you actually get about 90.7%. That's roughly one short replenishment cycle in ten, not one in twenty.
 
-The engine addresses this by calculating safety stock two ways: with closed-form variance math and with a Monte Carlo simulation of 100,000 replenishment cycles. It then rounds recommendations to the vendor's case or pallet multiples and shows how much working capital the buffer ties up.
+The engine sizes safety stock two ways: closed-form variance math and a Monte Carlo simulation of 100,000 cycles. It then rounds the results to the vendor's carton or pallet multiples and shows how much working capital the buffer ties up.
 
 ---
 
 ## 🔬 What It Does
 
-- **Three policies, side by side:**
-  1. **Static shortcut:** the baseline formula, which ignores transit variability.
-  2. **Closed-form normal approximation:** accounts for lead-time variance (σ_L).
-  3. **Monte Carlo simulation (100,000 cycles):** pulls empirical quantiles, so it holds up when lead times are skewed or contractor bulk orders spike unpredictably.
-- **Trade-desk constraints:**
-  - Shows the exact working capital committed to safety stock.
-  - Snaps order quantities to vendor case or pallet sizes (for example, 48 units per pallet).
-- **Interactive charts:** a live Plotly view of lead-time demand, with stockout cutoffs marked as you adjust inputs.
+### Tab 1: Single-SKU Simulator
+- **Three policies side by side:** the static shortcut, a closed-form normal approximation, and Monte Carlo empirical quantiles.
+- **Demand spike stress tests:** simulates contractor bulk buyouts to see whether the buffer holds.
+- **Interactive charts:** a live Plotly view of lead-time demand, with stockout cutoffs marked as you change inputs.
+
+### Tab 2: Department Catalog & PO Generator
+- **SQLite catalog (`inventory.db`):** stores SKU master data, unit costs, sales velocity, and vendor lead-time variance.
+- **Stockout status flags:** each SKU is marked 🚨 Reorder Now, ⚠️ Warning, or 🟢 Healthy.
+- **Purchase orders:** deficits are rounded up to full cartons and pallets, department spend is totaled, and the result exports to CSV in one click.
 
 ---
 
 ## 🧪 Verification
 
-The core math lives in `replenishment.py` and is covered by `test_formulas.py`, which has 20 tests. They check that:
+The math lives in `replenishment.py` and is covered by `test_formulas.py`. The tests confirm that:
 
-- The closed-form results reduce exactly to textbook formulas when lead-time variance is zero.
+- The closed-form results reduce to the textbook formulas when lead-time variance is zero.
 - Fill rates match the standard normal loss function, G(z) = φ(z) − z(1 − Φ(z)).
 - Monte Carlo estimates stay within ±0.005 of the analytical values across several independent seeds.
 
-To run the tests locally:
+To run them locally:
 
 ```bash
 pytest -v
 ```
-🚀 Quickstart: Running the Dashboard Locally
-code Bash
 
-# 1. Clone repository
+---
+
+## 🚀 Quickstart
+
+```bash
+# 1. Clone the repository
 git clone https://github.com/elliot-sandburg/stockout-risk-simulator.git
 cd stockout-risk-simulator
 
-# 2. Set up virtual environment and install dependencies
+# 2. Create a virtual environment and install dependencies
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 
-# 3. Launch interactive application
+# 3. Seed the database and launch the dashboard
+python init_db.py
 streamlit run app.py
+```
