@@ -1,4 +1,4 @@
-# 📦 Stockout Risk & Working Capital Simulator (v2)
+# 📦 Stockout Risk & Working Capital Simulator 
 
 A replenishment tool for teams that need to balance stockout risk against the cash tied up in inventory. It pairs a Monte Carlo simulator with a small SQLite-backed catalog and a purchase order generator, so you can go from "what should our safety stock be?" to an actual order in one place.
 
